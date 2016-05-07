@@ -11,26 +11,29 @@ import mkdirp from 'mkdirp'
 import phantom from 'phantom'
 import { exec } from 'child-process-promise'
 
+let config, root
 
 program
-  .version('0.1.0')
-  .option('-d, --dir <path>', 'Target directory')
-  .option('-c, --config [path]', 'Config file', '.preprc')
-  .option('-p, --port [port]', 'Phantom server port', 45678)
-  .parse(process.argv)
+  .description('Server-side rendering tool for your web app.\n  Prerenders your app into static HTML files and supports routing.')
+  .arguments('<build-dir>')
+  .option('-c, --config [path]', 'Config file (Default: .preprc)', '.preprc')
+  .option('-p, --port [port]', 'Phantom server port (Default: 45678)', 45678)
+  .action((dir) => {
+    if (!dir) {
+      console.log('No target directory provided.')
+      process.exit(1)
+    }
 
-let config
+    root = path.resolve(dir)
+  })
+
+program.parse(process.argv)
+
 try {
   config = JSON.parse(fs.readFileSync(path.resolve(program.config)))
 } catch (e) {
   throw new Error(`Couldn't read .preprc config file\n${e}`)
 }
-
-if (!program.dir) {
-  console.log('No target directory provided. Use -d or --dir <path>.')
-  process.exit(1)
-}
-const root = path.resolve(program.dir)
 
 const app = express()
   .use(serveStatic(root))

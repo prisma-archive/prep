@@ -2,7 +2,7 @@
   "private": true,
   "scripts": {
     "start": "webpack-dev-server -d --hot --inline --history-api-fallback --port 8080",
-    "build": "rm -rf dist && NODE_ENV=production webpack && cp static/* dist && prep -d dist"
+    "build": "rm -rf dist && NODE_ENV=production webpack && cp static/* dist && prep dist"
   },
   "dependencies": {
     "prep": "file:../..",

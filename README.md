@@ -10,5 +10,22 @@ npm install -D prep
 ## Usage
 
 ```sh
-prep -d ./dist
+  Usage: prep [options] <build-dir>
+
+  Options:
+
+    -h, --help           output usage information
+    -c, --config [path]  Config file (Default: .preprc)
+    -p, --port [port]    Phantom server port (Default: 45678)
+```
+
+## Example `.preprc`
+
+```json
+{
+  "routes": [
+    "/",
+    "/world"
+  ]
+}
 ```
