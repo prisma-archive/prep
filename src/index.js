@@ -66,6 +66,8 @@ const promises = config.routes.map((route) => {
       mkdirp.sync(filePath)
       fs.writeFileSync(path.join(filePath, 'index.html'), content)
 
+      console.log(`prep: Rendered ${route}/index.html`)
+
       page.close()
       instance.exit()
     })
