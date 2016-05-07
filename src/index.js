@@ -11,7 +11,7 @@ import mkdirp from 'mkdirp'
 import phantom from 'phantom'
 import { exec } from 'child-process-promise'
 
-let config, root
+let config, buildDir, tmpDir
 
 program
   .description('Server-side rendering tool for your web app.\n  Prerenders your app into static HTML files and supports routing.')
@@ -24,7 +24,8 @@ program
       process.exit(1)
     }
 
-    root = path.resolve(dir)
+    buildDir = path.resolve(dir)
+    tmpDir = path.resolve('.prep-tmp')
   })
 
 program.parse(process.argv)
@@ -36,8 +37,8 @@ try {
 }
 
 const app = express()
-  .use(serveStatic(root))
-  .use(fallback('index.html', { root: root }))
+  .use(serveStatic(buildDir))
+  .use(fallback('index.html', { root: buildDir }))
 
 const server = http.createServer(app).listen(program.port)
 
@@ -62,11 +63,12 @@ const promises = config.routes.map((route) => {
       })
     ))
     .then((content) => {
-      const filePath = path.join('./.tmp-prep', route)
+      const filePath = path.join(tmpDir, route)
       mkdirp.sync(filePath)
       fs.writeFileSync(path.join(filePath, 'index.html'), content)
 
-      console.log(`prep: Rendered ${route}/index.html`)
+      const logFileName = `${route}/index.html`.replace(/^\//, '')
+      console.log(`prep: Rendered ${logFileName}`)
 
       page.close()
       instance.exit()
@@ -80,6 +82,6 @@ const promises = config.routes.map((route) => {
 Promise.all(promises)
   .catch(() => server.close())
   .then(() => server.close())
-  .then(() => exec('cp -r ./.tmp-prep/ ./dist/'))
-  .then(() => exec('rm -rf ./.tmp-prep'))
+  .then(() => exec(`cp -r ${tmpDir} ${buildDir}`))
+  .then(() => exec(`rm -rf ${tmpDir}`))
   .then(() => process.exit(0))
