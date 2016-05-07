@@ -82,6 +82,6 @@ const promises = config.routes.map((route) => {
 Promise.all(promises)
   .catch(() => server.close())
   .then(() => server.close())
-  .then(() => exec(`cp -r ${tmpDir}/ ${buildDir}/`))
+  .then(() => exec(`cp -rf ${tmpDir}/* ${buildDir}/`))
   .then(() => exec(`rm -rf ${tmpDir}`))
   .then(() => process.exit(0))
