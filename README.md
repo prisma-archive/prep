@@ -4,7 +4,7 @@ Server-side rendering tool for your web app. Prerenders your app into static HTM
 ## Install
 
 ```sh
-npm install -D prep
+npm install -g prep
 ```
 
 ## Usage
