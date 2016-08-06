@@ -31,3 +31,7 @@ Create a script in your `package.json` and include the following command.
   ]
 }
 ```
+
+## Known Issues
+
+ - If you want to use `Object.assign()` in you code, please add a polyfill like [phantomjs-polyfill-object-assign](https://github.com/chuckplantain/phantomjs-polyfill-object-assign), because prep uses PhantomJS, which doesn't support `Object.assign()` yet.
