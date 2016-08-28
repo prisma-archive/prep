@@ -68,7 +68,7 @@ let config, buildDir, targetDir, tmpDir
 program
   .description('Server-side rendering tool for your web app.\n  Prerenders your app into static HTML files and supports routing.')
   .arguments('<build-dir> [target-dir]')
-  .option('-c, --config [path]', 'Config file (Default: .preprc)', '.preprc')
+  .option('-c, --config [path]', 'Config file (Default: prep.js)', 'prep.js')
   .option('-p, --port [port]', 'Phantom server port (Default: 45678)', 45678)
   .action((bdir, tdir) => {
     if (!bdir) {
