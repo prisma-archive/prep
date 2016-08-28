@@ -15,8 +15,10 @@ const util = require('util')
 
 const crawlAndWrite = (configuration) => {
 
+  let dimensions = Object.assign({}, {width: 1440, height: 900}, configuration.dimensions)
+  delete configuration.dimensions
   configuration = Object.assign({}, {
-    routes: ['/'], timeout: 1000, pagewidth: 1440
+    routes: ['/'], timeout: 1000, dimensions
   }, configuration)
 
   const app = express()
@@ -30,7 +32,7 @@ const crawlAndWrite = (configuration) => {
     route = route.replace(/^\//, '')
     let instance = await phantom.create()
     let page = await instance.createPage()
-    page.property('viewportSize', {width: configuration.pagewidth, height: 1080})
+    page.property('viewportSize', {width: configuration.dimensions.width, height: configuration.dimensions.height})
     let content = await page.open(`http://localhost:${program.port}/${route}`)
       .then(() => {
         return new Promise((resolve) => {
