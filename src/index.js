@@ -30,18 +30,16 @@ const crawlAndWrite = (configuration) => {
   const promises = configuration.routes.map(async (route) => {
     // remove leading slash from route
     route = route.replace(/^\//, '')
-    let instance = await phantom.create()
-    let page = await instance.createPage()
+    const instance = await phantom.create()
+    const page = await instance.createPage()
     page.property('viewportSize', {width: configuration.dimensions.width, height: configuration.dimensions.height})
-    let content = await page.open(`http://localhost:${program.port}/${route}`)
-      .then(() => {
-        return new Promise((resolve) => {
+    await page.open(`http://localhost:${program.port}/${route}`)
+    const content = await new Promise((resolve) => {
           setTimeout(() => resolve(page.evaluate(
               () => document.documentElement.outerHTML,
               configuration.timeout)
           ))
         })
-      })
     const filePath = path.join(tmpDir, route)
     mkdirp.sync(filePath)
     fs.writeFileSync(path.join(filePath, 'index.html'), content)
@@ -58,8 +56,8 @@ const crawlAndWrite = (configuration) => {
   Promise.all(promises)
     .catch(() => server.close())
     .then(() => server.close())
+    .then(() => exec(`rm -f ${tmpDir}/prep.js`))
     .then(() => exec(`cp -rf ${tmpDir}/* ${targetDir}/`))
-    .then(() => exec(`rm -f ${targetDir}/prep.js`))
     .then(() => exec(`rm -rf ${tmpDir}`))
     .then(() => process.exit(0))
 }
