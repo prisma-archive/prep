@@ -14,6 +14,11 @@ import { exec } from 'child-process-promise'
 const util = require('util')
 
 const crawlAndWrite = (configuration) => {
+
+  configuration = Object.assign({}, {
+    routes: ['/'], timeout: 1000, pagewidth: 1440
+  }, configuration)
+
   const app = express()
     .use(serveStatic(buildDir))
     .use(fallback('index.html', { root: buildDir }))
