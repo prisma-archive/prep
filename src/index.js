@@ -13,7 +13,7 @@ import { exec } from 'child-process-promise'
 
 const util = require('util')
 
-const crawlAndWrite = (configuration) => {
+const crawlAndWrite = async (configuration) => {
 
   let dimensions = Object.assign({}, {width: 1440, height: 900}, configuration.dimensions)
   delete configuration.dimensions
@@ -53,13 +53,12 @@ const crawlAndWrite = (configuration) => {
 
   mkdirp.sync(targetDir)
 
-  Promise.all(promises)
-    .catch(() => server.close())
-    .then(() => server.close())
-    .then(() => exec(`rm -f ${tmpDir}/prep.js`))
-    .then(() => exec(`cp -rf ${tmpDir}/* ${targetDir}/`))
-    .then(() => exec(`rm -rf ${tmpDir}`))
-    .then(() => process.exit(0))
+  await Promise.all(promises)
+  server.close()
+  await exec(`rm -f ${tmpDir}/prep.js`)
+  await exec(`cp -rf ${tmpDir}/* ${targetDir}/`)
+  await exec(`rm -rf ${tmpDir}`)
+  process.exit(0)
 }
 
 let babel = require('babel-core')
