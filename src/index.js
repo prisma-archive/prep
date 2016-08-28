@@ -61,30 +61,34 @@ const crawlAndWrite = (configuration) => {
       })
   })
 
+  mkdirp.sync(targetDir)
+
   Promise.all(promises)
     .catch(() => server.close())
     .then(() => server.close())
-    .then(() => exec(`cp -rf ${tmpDir}/* ${buildDir}/`))
+    .then(() => exec(`cp -rf ${tmpDir}/* ${targetDir}/`))
+    .then(() => exec(`rm -f ${targetDir}/prep.js`))
     .then(() => exec(`rm -rf ${tmpDir}`))
     .then(() => process.exit(0))
 }
 
 let babel = require('babel-core')
 
-let config, buildDir, tmpDir
+let config, buildDir, targetDir, tmpDir
 
 program
   .description('Server-side rendering tool for your web app.\n  Prerenders your app into static HTML files and supports routing.')
-  .arguments('<build-dir>')
+  .arguments('<build-dir> [target-dir]')
   .option('-c, --config [path]', 'Config file (Default: .preprc)', '.preprc')
   .option('-p, --port [port]', 'Phantom server port (Default: 45678)', 45678)
-  .action((dir) => {
-    if (!dir) {
+  .action((bdir, tdir) => {
+    if (!bdir) {
       console.log('No target directory provided.')
       process.exit(1)
     }
 
-    buildDir = path.resolve(dir)
+    buildDir = path.resolve(bdir)
+    targetDir = tdir ? path.resolve(tdir) : bulidDir
     tmpDir = path.resolve('.prep-tmp')
   })
 
