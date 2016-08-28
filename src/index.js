@@ -88,28 +88,29 @@ program
     }
 
     buildDir = path.resolve(bdir)
-    targetDir = tdir ? path.resolve(tdir) : bulidDir
+    targetDir = tdir ? path.resolve(tdir) : buildDir
     tmpDir = path.resolve('.prep-tmp')
   })
 
 program.parse(process.argv)
 
-try {
-  const code = babel.transformFileSync(path.resolve(program.config), {presets: ["es2015"]}).code
-  mkdirp.sync(tmpDir)
-  fs.writeFileSync(path.join(tmpDir, 'prep.js'), code)
-  config = require(path.join(tmpDir, 'prep.js')).default
+const prepareConfig = async () => {
+  try {
+    const code = babel.transformFileSync(path.resolve(program.config), {presets: ["es2015", "stage-0"], plugins: ["transform-runtime"]}).code
+    mkdirp.sync(tmpDir)
+    fs.writeFileSync(path.join(tmpDir, 'prep.js'), code)
+    config = require(path.join(tmpDir, 'prep.js')).default
 
-  if (Promise.resolve(config) === config) {
-    config.then((x) => {
-      crawlAndWrite(x)
-    })
-  } else if (typeof config === 'function') {
-    crawlAndWrite(config())
-  } else {
-    crawlAndWrite(config)
+    if (Promise.resolve(config) === config) {
+      crawlAndWrite(await config)
+    } else if (typeof config === 'function') {
+      crawlAndWrite(config())
+    } else {
+      crawlAndWrite(config)
+    }
+  } catch (e) {
+    throw new Error(e)
   }
-} catch (e) {
-  throw new Error(e)
 }
 
+prepareConfig()
