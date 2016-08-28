@@ -20,22 +20,13 @@ const crawlAndWrite = (configuration) => {
 
   const server = http.createServer(app).listen(program.port)
 
-  const promises = configuration.routes.map((route) => {
-    let page, instance
-
+  const promises = configuration.routes.map(async (route) => {
     // remove leading slash from route
     route = route.replace(/^\//, '')
-
-    return phantom.create()
-      .then((_instance) => {
-        instance = _instance
-        return instance.createPage()
-      })
-      .then((_page) => {
-        page = _page
-        page.property('viewportSize', {width: configuration.pagewidth, height: 1080})
-        return page.open(`http://localhost:${program.port}/${route}`)
-      })
+    let instance = await phantom.create()
+    let page = await instance.createPage()
+    page.property('viewportSize', {width: configuration.pagewidth, height: 1080})
+    let content = await page.open(`http://localhost:${program.port}/${route}`)
       .then(() => {
         return new Promise((resolve) => {
           setTimeout(() => resolve(page.evaluate(
@@ -44,21 +35,15 @@ const crawlAndWrite = (configuration) => {
           ))
         })
       })
-      .then((content) => {
-        const filePath = path.join(tmpDir, route)
-        mkdirp.sync(filePath)
-        fs.writeFileSync(path.join(filePath, 'index.html'), content)
+    const filePath = path.join(tmpDir, route)
+    mkdirp.sync(filePath)
+    fs.writeFileSync(path.join(filePath, 'index.html'), content)
 
-        const logFileName = `${route}/index.html`.replace(/^\//, '')
-        console.log(`prep: Rendered ${logFileName}`)
+    const logFileName = `${route}/index.html`.replace(/^\//, '')
+    console.log(`prep: Rendered ${logFileName}`)
 
-        page.close()
-        instance.exit()
-      })
-      .catch((error) => {
-        console.log(error)
-        instance.exit()
-      })
+    page.close()
+    instance.exit()
   })
 
   mkdirp.sync(targetDir)
