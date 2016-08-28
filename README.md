@@ -17,10 +17,10 @@ npm install -g prep
 
 ## Usage
 
-Just run `prep` in your terminal or add it to the `scripts` as part of your build step in your `package.json`. If you don't provide a `<target-dir>` the contents of the `<build-dir>` will be overwritten.
+Just run `prep` in your terminal or add it to the `scripts` as part of your build step in your `package.json`. If you don't provide a `target-dir` the contents of the `source-dir` will be overwritten.
 
 ```sh
-  Usage: prep [options] <build-dir> [<target-dir>]
+  Usage: prep [options] <source-dir> [target-dir]
 
   Options:
 
@@ -54,8 +54,8 @@ The probably easiest way is to export a simple Javascript object.
 ```js
 export default {
   routes: [
-    "/",
-    "/world"
+    '/',
+    '/world'
   ]
 }
 ```
@@ -68,8 +68,8 @@ You can also return a function that returns the config for `prep`.
 export default () => {
   return {
     routes: [
-      "/",
-      "/world"
+      '/',
+      '/world'
     ]
   }
 }
