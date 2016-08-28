@@ -35,13 +35,16 @@ In order to configure the routes which you'd like to pre-render you need to spec
 const defaultConfig = {
   routes: ['/'],
   timeout: 1000,
-  pagewidth: 1440,
+  dimensions: {
+    width: 1440,
+    height: 900,
+  },
 }
 ```
 
 * `routes` specifies the list of routes that the renderer should pass. (Default: `['/']`)
 * `timeout` is the timeout for how long the renderer should wait for network requests. (Default: `1000`)
-* `pagewidth` the page width in pixels that the renderer should use to render the site. (Default: `1440`)
+* `dimensions` the page dimensions in pixels that the renderer should use to render the site. (Default: `1440` x `900`)
 
 ## Example `prep.js`
 
