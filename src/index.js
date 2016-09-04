@@ -21,7 +21,7 @@ const crawlAndWrite = async (configuration) => {
     routes: ['/'],
     timeout: 1000,
     dimensions,
-    https: true,
+    https: false,
   }, configuration)
 
   const app = express()
