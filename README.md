@@ -40,6 +40,7 @@ const defaultConfig = {
     height: 900,
   },
   https: false,
+  hostname: 'http://localhost'
 }
 ```
 
@@ -47,6 +48,7 @@ const defaultConfig = {
 * `timeout` is the timeout for how long the renderer should wait for network requests. (Default: `1000`)
 * `dimensions` the page dimensions in pixels that the renderer should use to render the site. (Default: `1440` x `900`)
 * `https` prep uses https if true otherwise http
+* `hostname` is used to show the correct urls in the generated sitemap that is stored in `[target-dir]/sitemap.xml`
 
 ## Example `prep.js`
 

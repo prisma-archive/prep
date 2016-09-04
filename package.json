@@ -49,6 +49,7 @@
     "mkdirp": "^0.5.1",
     "phantom": "^2.1.20",
     "phantomjs": "^2.1.7",
-    "serve-static": "^1.10.2"
+    "serve-static": "^1.10.2",
+    "sitemap": "^1.8.1"
   }
 }

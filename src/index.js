@@ -10,10 +10,19 @@ import fallback from 'express-history-api-fallback'
 import mkdirp from 'mkdirp'
 import phantom from 'phantom'
 import { exec } from 'child-process-promise'
+import sitemap from 'sitemap'
 
 const util = require('util')
 
 const crawlAndWrite = async (configuration) => {
+
+  const sm = sitemap.createSitemap({
+    hostname: configuration.hostname,
+    urls: configuration.routes.map((route) => ({url: route}))
+  })
+
+  fs.writeFileSync(`${targetDir}/sitemap.xml`, sm.toString());
+
 
   let dimensions = Object.assign({}, {width: 1440, height: 900}, configuration.dimensions)
   delete configuration.dimensions
@@ -22,6 +31,7 @@ const crawlAndWrite = async (configuration) => {
     timeout: 1000,
     dimensions,
     https: false,
+    hostname: 'http://localhost',
   }, configuration)
 
   const app = express()
