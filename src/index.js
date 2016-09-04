@@ -18,7 +18,10 @@ const crawlAndWrite = async (configuration) => {
   let dimensions = Object.assign({}, {width: 1440, height: 900}, configuration.dimensions)
   delete configuration.dimensions
   configuration = Object.assign({}, {
-    routes: ['/'], timeout: 1000, dimensions
+    routes: ['/'],
+    timeout: 1000,
+    dimensions,
+    https: true,
   }, configuration)
 
   const app = express()
@@ -33,7 +36,7 @@ const crawlAndWrite = async (configuration) => {
     const instance = await phantom.create()
     const page = await instance.createPage()
     page.property('viewportSize', {width: configuration.dimensions.width, height: configuration.dimensions.height})
-    await page.open(`http://localhost:${program.port}/${route}`)
+    await page.open(`http${configuration.https ? 's' : ''}://localhost:${program.port}/${route}`)
     const content = await new Promise((resolve) => {
           setTimeout(() => resolve(page.evaluate(
               () => document.documentElement.outerHTML,
