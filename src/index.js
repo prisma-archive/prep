@@ -12,7 +12,7 @@ import phantom from 'phantom'
 import { exec } from 'child-process-promise'
 import sitemap from 'sitemap'
 
-const util = require('util')
+let buildDir, targetDir, tmpDir
 
 const crawlAndWrite = async (configuration) => {
 
@@ -43,16 +43,19 @@ const crawlAndWrite = async (configuration) => {
   const promises = configuration.routes.map(async (route) => {
     // remove leading slash from route
     route = route.replace(/^\//, '')
-    const instance = await phantom.create()
+
+    const phantomOptions = ['--disk-cache=true']
+
+    const instance = await phantom.create(phantomOptions)
     const page = await instance.createPage()
     page.property('viewportSize', {width: configuration.dimensions.width, height: configuration.dimensions.height})
     await page.open(`http${configuration.https ? 's' : ''}://localhost:${program.port}/${route}`)
     const content = await new Promise((resolve) => {
-          setTimeout(() => resolve(page.evaluate(
-              () => document.documentElement.outerHTML,
-              configuration.timeout)
-          ))
-        })
+      setTimeout(() => resolve(page.evaluate(
+          () => document.documentElement.outerHTML,
+          configuration.timeout)
+      ))
+    })
     const filePath = path.join(tmpDir, route)
     mkdirp.sync(filePath)
     fs.writeFileSync(path.join(filePath, 'index.html'), content)
@@ -68,17 +71,13 @@ const crawlAndWrite = async (configuration) => {
 
   await Promise.all(promises)
   server.close()
-  await exec(`rm -f ${tmpDir}/prep.js`)
   await exec(`cp -rf ${tmpDir}/* ${targetDir}/`)
   await exec(`rm -rf ${tmpDir}`)
   process.exit(0)
 }
 
-let babel = require('babel-core')
-
-let config, buildDir, targetDir, tmpDir
-
 program
+  .version('1.0.1')
   .description('Server-side rendering tool for your web app.\n  Prerenders your app into static HTML files and supports routing.')
   .arguments('<build-dir> [target-dir]')
   .option('-c, --config [path]', 'Config file (Default: prep.js)', 'prep.js')
@@ -96,23 +95,14 @@ program
 
 program.parse(process.argv)
 
-const prepareConfig = async () => {
-  try {
-    const code = babel.transformFileSync(path.resolve(program.config), {presets: ["es2015", "stage-0"], plugins: ["transform-runtime"]}).code
-    mkdirp.sync(tmpDir)
-    fs.writeFileSync(path.join(tmpDir, 'prep.js'), code)
-    config = require(path.join(tmpDir, 'prep.js')).default
 
-    if (Promise.resolve(config) === config) {
-      crawlAndWrite(await config)
-    } else if (typeof config === 'function') {
-      crawlAndWrite(config())
-    } else {
-      crawlAndWrite(config)
-    }
-  } catch (e) {
-    throw new Error(e)
-  }
+const config = require(path.resolve(program.config)).default
+
+if (Promise.resolve(config) === config) {
+  config.then((c) => crawlAndWrite(c))
+  //crawlAndWrite(await config)
+} else if (typeof config === 'function') {
+  crawlAndWrite(config())
+} else {
+  crawlAndWrite(config)
 }
-
-prepareConfig()
