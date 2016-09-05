@@ -10,21 +10,29 @@ import fallback from 'express-history-api-fallback'
 import mkdirp from 'mkdirp'
 import phantom from 'phantom'
 import { exec } from 'child-process-promise'
+import sitemap from 'sitemap'
 
 let buildDir, targetDir, tmpDir
 
 const crawlAndWrite = async (configuration) => {
 
+  const sm = sitemap.createSitemap({
+    hostname: configuration.hostname,
+    urls: configuration.routes.map((route) => ({url: route}))
+  })
+
+  fs.writeFileSync(`${targetDir}/sitemap.xml`, sm.toString());
+
+
   let dimensions = Object.assign({}, {width: 1440, height: 900}, configuration.dimensions)
   delete configuration.dimensions
-  configuration = Object.assign(
-    {
-      routes: ['/'],
-      timeout: 1000,
-      dimensions,
-    },
-    configuration
-  )
+  configuration = Object.assign({}, {
+    routes: ['/'],
+    timeout: 1000,
+    dimensions,
+    https: false,
+    hostname: 'http://localhost',
+  }, configuration)
 
   const app = express()
     .use(serveStatic(buildDir))
@@ -41,7 +49,7 @@ const crawlAndWrite = async (configuration) => {
     const instance = await phantom.create(phantomOptions)
     const page = await instance.createPage()
     page.property('viewportSize', {width: configuration.dimensions.width, height: configuration.dimensions.height})
-    await page.open(`http://localhost:${program.port}/${route}`)
+    await page.open(`http${configuration.https ? 's' : ''}://localhost:${program.port}/${route}`)
     const content = await new Promise((resolve) => {
       setTimeout(() => resolve(page.evaluate(
           () => document.documentElement.outerHTML,
@@ -87,28 +95,14 @@ program
 
 program.parse(process.argv)
 
-//const run = () => {
-  //const configFilePath = path.resolve(program.config)
-  //const babelOptions = {
-    //presets: ['es2015', 'stage-0'],
-    //plugins: ['transform-runtime'],
-    //babelrc: false,
-  //}
-  // transpile config file to ES5
-  //const { code } = babel.transformFileSync(configFilePath, babelOptions)
 
-  // write transpiled code to temp file and require it
-  //const writeStream = fs.writeFileSync('.prep.js', code)
-  const config = require(path.resolve(program.config)).default
+const config = require(path.resolve(program.config)).default
 
-  if (Promise.resolve(config) === config) {
-    config.then((c) => crawlAndWrite(c))
-    //crawlAndWrite(await config)
-  } else if (typeof config === 'function') {
-    crawlAndWrite(config())
-  } else {
-    crawlAndWrite(config)
-  }
-//}
-
-//run()
+if (Promise.resolve(config) === config) {
+  config.then((c) => crawlAndWrite(c))
+  //crawlAndWrite(await config)
+} else if (typeof config === 'function') {
+  crawlAndWrite(config())
+} else {
+  crawlAndWrite(config)
+}
