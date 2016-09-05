@@ -53,14 +53,14 @@ async function crawlAndWrite (configuration) {
     server = http.createServer(app)
   }
 
-  server.listen(program.port, (x) => console.log(x))
+  server.listen(program.port)
 
   // render routes
   const promises = configuration.routes.map(async (route) => {
     // remove leading slash from route
     route = route.replace(/^\//, '')
 
-    const phantomOptions = ['--disk-cache=true']
+    const phantomOptions = ['--disk-cache=true', '--ignore-ssl-errors=yes']
 
     const instance = await phantom.create(phantomOptions)
     const page = await instance.createPage()
