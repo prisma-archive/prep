@@ -4,6 +4,7 @@ import program from 'commander'
 import path from 'path'
 import fs from 'fs'
 import http from 'http'
+import https from 'https'
 import express from 'express'
 import serveStatic from 'serve-static'
 import fallback from 'express-history-api-fallback'
@@ -12,18 +13,13 @@ import phantom from 'phantom'
 import { exec } from 'child-process-promise'
 import sitemap from 'sitemap'
 
+const { version } = require('../package.json')
+
 let buildDir, targetDir, tmpDir
 
-const crawlAndWrite = async (configuration) => {
+async function crawlAndWrite (configuration) {
 
-  const sm = sitemap.createSitemap({
-    hostname: configuration.hostname,
-    urls: configuration.routes.map((route) => ({url: route}))
-  })
-
-  fs.writeFileSync(`${targetDir}/sitemap.xml`, sm.toString());
-
-
+  // prepare configuration
   let dimensions = Object.assign({}, {width: 1440, height: 900}, configuration.dimensions)
   delete configuration.dimensions
   configuration = Object.assign({}, {
@@ -34,12 +30,32 @@ const crawlAndWrite = async (configuration) => {
     hostname: 'http://localhost',
   }, configuration)
 
+  // render sitemap
+  const sm = sitemap.createSitemap({
+    hostname: configuration.hostname,
+    urls: configuration.routes.map((route) => ({url: route}))
+  })
+  mkdirp.sync(targetDir)
+  fs.writeFileSync(`${targetDir}/sitemap.xml`, sm.toString());
+
+  // start temporary local webserver
   const app = express()
     .use(serveStatic(buildDir))
     .use(fallback('index.html', { root: buildDir }))
+  let server
+  if (configuration.https) {
+    const credentials = {
+      key: fs.readFileSync(`${__dirname}/../ssl/key.pem`),
+      cert: fs.readFileSync(`${__dirname}/../ssl/cert.pem`),
+    }
+    server = https.createServer(credentials, app)
+  } else {
+    server = http.createServer(app)
+  }
 
-  const server = http.createServer(app).listen(program.port)
+  server.listen(program.port, (x) => console.log(x))
 
+  // render routes
   const promises = configuration.routes.map(async (route) => {
     // remove leading slash from route
     route = route.replace(/^\//, '')
@@ -67,8 +83,7 @@ const crawlAndWrite = async (configuration) => {
     instance.exit()
   })
 
-  mkdirp.sync(targetDir)
-
+  // clean up files
   await Promise.all(promises)
   server.close()
   await exec(`cp -rf ${tmpDir}/* ${targetDir}/`)
@@ -76,33 +91,40 @@ const crawlAndWrite = async (configuration) => {
   process.exit(0)
 }
 
-program
-  .version('1.0.1')
-  .description('Server-side rendering tool for your web app.\n  Prerenders your app into static HTML files and supports routing.')
-  .arguments('<build-dir> [target-dir]')
-  .option('-c, --config [path]', 'Config file (Default: prep.js)', 'prep.js')
-  .option('-p, --port [port]', 'Phantom server port (Default: 45678)', 45678)
-  .action((bdir, tdir) => {
-    if (!bdir) {
-      console.log('No target directory provided.')
-      process.exit(1)
+async function run () {
+  program
+    .version(version)
+    .description('Server-side rendering tool for your web app.\n  Prerenders your app into static HTML files and supports routing.')
+    .arguments('<build-dir> [target-dir]')
+    .option('-c, --config [path]', 'Config file (Default: prep.js)', 'prep.js')
+    .option('-p, --port [port]', 'Phantom server port (Default: 45678)', 45678)
+    .action((bdir, tdir) => {
+      if (!bdir) {
+        console.log('No target directory provided.')
+        process.exit(1)
+      }
+
+      buildDir = path.resolve(bdir)
+      targetDir = tdir ? path.resolve(tdir) : buildDir
+      tmpDir = path.resolve('.prep-tmp')
+    })
+
+  program.parse(process.argv)
+
+  const config = require(path.resolve(program.config)).default
+
+  try {
+    if (Promise.resolve(config) === config) {
+      await crawlAndWrite(await config)
+    } else if (typeof config === 'function') {
+      await crawlAndWrite(config())
+    } else {
+      await crawlAndWrite(config)
     }
-
-    buildDir = path.resolve(bdir)
-    targetDir = tdir ? path.resolve(tdir) : buildDir
-    tmpDir = path.resolve('.prep-tmp')
-  })
-
-program.parse(process.argv)
-
-
-const config = require(path.resolve(program.config)).default
-
-if (Promise.resolve(config) === config) {
-  config.then((c) => crawlAndWrite(c))
-  //crawlAndWrite(await config)
-} else if (typeof config === 'function') {
-  crawlAndWrite(config())
-} else {
-  crawlAndWrite(config)
+  } catch (e) {
+    console.log(e)
+    process.exit(1)
+  }
 }
+
+run()
