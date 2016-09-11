@@ -1,6 +1,6 @@
 {
   "name": "prep",
-  "version": "1.1.4",
+  "version": "1.1.6",
   "description": "Server-side rendering tool for your web app. Prerenders your app into static HTML files and supports routing.",
   "bin": "lib/index.js",
   "files": [
@@ -42,6 +42,7 @@
     "util": "^0.10.3"
   },
   "dependencies": {
+    "babel-runtime": "^6.11.6",
     "child-process-promise": "^2.0.2",
     "commander": "^2.9.0",
     "express": "^4.13.4",

@@ -92,28 +92,28 @@ async function crawlAndWrite (configuration) {
 }
 
 async function run () {
-  program
-    .version(version)
-    .description('Server-side rendering tool for your web app.\n  Prerenders your app into static HTML files and supports routing.')
-    .arguments('<build-dir> [target-dir]')
-    .option('-c, --config [path]', 'Config file (Default: prep.js)', 'prep.js')
-    .option('-p, --port [port]', 'Phantom server port (Default: 45678)', 45678)
-    .action((bdir, tdir) => {
-      if (!bdir) {
-        console.log('No target directory provided.')
-        process.exit(1)
-      }
-
-      buildDir = path.resolve(bdir)
-      targetDir = tdir ? path.resolve(tdir) : buildDir
-      tmpDir = path.resolve('.prep-tmp')
-    })
-
-  program.parse(process.argv)
-
-  const config = require(path.resolve(program.config)).default
-
   try {
+    program
+      .version(version)
+      .description('Server-side rendering tool for your web app.\n  Prerenders your app into static HTML files and supports routing.')
+      .arguments('<build-dir> [target-dir]')
+      .option('-c, --config [path]', 'Config file (Default: prep.js)', 'prep.js')
+      .option('-p, --port [port]', 'Phantom server port (Default: 45678)', 45678)
+      .action((bdir, tdir) => {
+        if (!bdir) {
+          console.log('No target directory provided.')
+          process.exit(1)
+        }
+
+        buildDir = path.resolve(bdir)
+        targetDir = tdir ? path.resolve(tdir) : buildDir
+        tmpDir = path.resolve('.prep-tmp')
+      })
+
+    program.parse(process.argv)
+
+    const config = require(path.resolve(program.config)).default
+
     if (Promise.resolve(config) === config) {
       await crawlAndWrite(await config)
     } else if (typeof config === 'function') {
