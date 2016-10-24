@@ -1,6 +1,6 @@
 {
   "name": "prep",
-  "version": "1.1.6",
+  "version": "1.2.0",
   "description": "Server-side rendering tool for your web app. Prerenders your app into static HTML files and supports routing.",
   "bin": "lib/index.js",
   "files": [
@@ -48,8 +48,8 @@
     "express": "^4.13.4",
     "express-history-api-fallback": "^2.0.0",
     "mkdirp": "^0.5.1",
-    "phantom": "^2.1.20",
-    "phantomjs": "^2.1.7",
+    "phantom": "^3.0.1",
+    "phantomjs-prebuilt": "^2.1.13",
     "serve-static": "^1.10.2",
     "sitemap": "^1.8.1"
   }
