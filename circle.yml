@@ -1,0 +1,11 @@
+machine:
+  node:
+    version: 6.8.1
+
+dependencies:
+  override:
+    - npm install
+
+test:
+  override:
+    - cd examples/react-webpack && npm install && npm run build

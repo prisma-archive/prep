@@ -59,7 +59,7 @@ There are three different ways to configure `prep`. Which one you pick depends o
 The probably easiest way is to export a simple Javascript object.
 
 ```js
-export default {
+exports.default = {
   routes: [
     '/',
     '/world'
@@ -72,7 +72,7 @@ export default {
 You can also return a function that returns the config for `prep`.
 
 ```js
-export default () => {
+exports.default = () => {
   return {
     routes: [
       '/',
@@ -84,7 +84,7 @@ export default () => {
 
 ### 3. Asynchronous Function (Promise)
 
-Furthermore you can also return a `Promise` or use ES7 features such as `async` & `await`.
+Furthermore you can also return a `Promise` or use ES7 features such as `async` & `await` (Babel pre-compile step needed).
 
 ```js
 export default async () => {
