@@ -1,4 +1,4 @@
-# prep [![npm version](https://badge.fury.io/js/prep.svg)](https://badge.fury.io/js/prep)
+# prep [![npm version](https://badge.fury.io/js/prep.svg)](https://badge.fury.io/js/prep) [![CircleCI](https://circleci.com/gh/graphcool/prep.svg?style=svg)](https://circleci.com/gh/graphcool/prep)
 
 Pre-renders your web app into static HTML based on your specified routes enabling SEO for single page applications.
 
