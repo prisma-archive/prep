@@ -9,9 +9,10 @@ import express from 'express'
 import serveStatic from 'serve-static'
 import fallback from 'express-history-api-fallback'
 import mkdirp from 'mkdirp'
-import phantom from 'phantom'
 import { exec } from 'child-process-promise'
+import Bluebird from 'bluebird'
 import sitemap from 'sitemap'
+import Nightmare from 'nightmare'
 
 const { version } = require('../package.json')
 
@@ -28,6 +29,7 @@ async function crawlAndWrite (configuration) {
     dimensions,
     https: false,
     hostname: 'http://localhost',
+    concurrency: 4,
   }, configuration)
 
   // render sitemap
@@ -56,38 +58,37 @@ async function crawlAndWrite (configuration) {
   server.listen(program.port)
 
   // render routes
-  const promises = configuration.routes.map(async (route) => {
+  const promises = configuration.routes.map((route) => async () => {
     // remove leading slash from route
     route = route.replace(/^\//, '')
 
-    const phantomOptions = ['--disk-cache=true', '--ignore-ssl-errors=yes']
-
-    const instance = await phantom.create(phantomOptions)
-    const page = await instance.createPage()
-    page.property('viewportSize', {width: configuration.dimensions.width, height: configuration.dimensions.height})
-    await page.open(`http${configuration.https ? 's' : ''}://localhost:${program.port}/${route}`)
-    const content = await new Promise((resolve) => {
-      setTimeout(() => resolve(page.evaluate(
-          () => document.documentElement.outerHTML,
-          configuration.timeout)
-      ))
+    const nightmare = Nightmare({
+      show: false,
+      switches: {
+        'ignore-certificate-errors': true,
+      },
     })
+
+    const content = await nightmare
+      .viewport(configuration.dimensions.width, configuration.dimensions.height)
+      .goto(`http${configuration.https ? 's' : ''}://localhost:${program.port}/${route}`)
+      .wait(configuration.timeout)
+      .evaluate(() => document.documentElement.outerHTML)
+      .end()
+
     const filePath = path.join(tmpDir, route)
     mkdirp.sync(filePath)
     fs.writeFileSync(path.join(filePath, 'index.html'), content)
 
     const logFileName = `${route}/index.html`.replace(/^\//, '')
     console.log(`prep: Rendered ${logFileName}`)
-
-    page.close()
-    instance.exit()
   })
 
   // clean up files
-  await Promise.all(promises)
+  await Bluebird.map(promises, fn => fn(), {concurrency: configuration.concurrency})
   server.close()
-  await exec(`cp -rf ${tmpDir}/* ${targetDir}/`)
-  await exec(`rm -rf ${tmpDir}`)
+  await exec(`cp -rf "${tmpDir}"/* "${targetDir}"/`)
+  await exec(`rm -rf "${tmpDir}"`)
   process.exit(0)
 }
 
@@ -98,7 +99,7 @@ async function run () {
       .description('Server-side rendering tool for your web app.\n  Prerenders your app into static HTML files and supports routing.')
       .arguments('<build-dir> [target-dir]')
       .option('-c, --config [path]', 'Config file (Default: prep.js)', 'prep.js')
-      .option('-p, --port [port]', 'Phantom server port (Default: 45678)', 45678)
+      .option('-p, --port [port]', 'Temporary webserver port (Default: 45678)', 45678)
       .action((bdir, tdir) => {
         if (!bdir) {
           console.log('No target directory provided.')
@@ -114,10 +115,13 @@ async function run () {
 
     const config = require(path.resolve(program.config)).default
 
-    if (Promise.resolve(config) === config) {
-      await crawlAndWrite(await config)
-    } else if (typeof config === 'function') {
-      await crawlAndWrite(config())
+    if (typeof config === 'function') {
+      const fnConfig = config()
+      if (Promise.resolve(fnConfig) === fnConfig) {
+        await crawlAndWrite(await fnConfig)
+      } else {
+        await crawlAndWrite(fnConfig)
+      }
     } else {
       await crawlAndWrite(config)
     }
