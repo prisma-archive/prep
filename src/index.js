@@ -113,6 +113,10 @@ async function run () {
 
     program.parse(process.argv)
 
+    if (!buildDir) {
+      program.help()
+    }
+
     const config = require(path.resolve(program.config)).default
 
     if (typeof config === 'function') {
