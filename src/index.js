@@ -72,7 +72,7 @@ async function crawlAndWrite (configuration) {
     })
 
     const content = await nightmare
-      .useragent()
+      .useragent(configuration.useragent)
       .viewport(configuration.dimensions.width, configuration.dimensions.height)
       .goto(`http${configuration.https ? 's' : ''}://localhost:${program.port}/${route}`)
       .wait(configuration.timeout)
