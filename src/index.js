@@ -21,14 +21,16 @@ let buildDir, targetDir, tmpDir
 async function crawlAndWrite (configuration) {
 
   // prepare configuration
-  let dimensions = Object.assign({}, {width: 1440, height: 900}, configuration.dimensions)
+  const dimensions = Object.assign({}, {width: 1440, height: 900}, configuration.dimensions)
   delete configuration.dimensions
+
   configuration = Object.assign({}, {
     routes: ['/'],
     timeout: 1000,
     dimensions,
     https: false,
     hostname: 'http://localhost',
+    useragent: 'Prep',
     concurrency: 4,
   }, configuration)
 
@@ -70,6 +72,7 @@ async function crawlAndWrite (configuration) {
     })
 
     const content = await nightmare
+      .useragent()
       .viewport(configuration.dimensions.width, configuration.dimensions.height)
       .goto(`http${configuration.https ? 's' : ''}://localhost:${program.port}/${route}`)
       .wait(configuration.timeout)
