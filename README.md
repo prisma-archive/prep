@@ -42,6 +42,7 @@ const defaultConfig = {
   https: false,
   hostname: 'http://localhost',
   useragent: 'Prep',
+  minify: false,
 }
 ```
 
@@ -51,6 +52,7 @@ const defaultConfig = {
 * `https` prep uses https if true otherwise http
 * `hostname` is used to show the correct urls in the generated sitemap that is stored in `[target-dir]/sitemap.xml`
 * `useragent` is set a `navigator.userAgent`
+* `minify` is a boolean or a [html-minifier](https://github.com/kangax/html-minifier) configuration object.
 
 ## Example `prep.js`
 

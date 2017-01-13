@@ -13,6 +13,7 @@ import { exec } from 'child-process-promise'
 import Bluebird from 'bluebird'
 import sitemap from 'sitemap'
 import Nightmare from 'nightmare'
+import { minify } from 'html-minifier'
 
 const { version } = require('../package.json')
 
@@ -31,6 +32,7 @@ async function crawlAndWrite (configuration) {
     https: false,
     hostname: 'http://localhost',
     useragent: 'Prep',
+    minify: false,
     concurrency: 4,
   }, configuration)
 
@@ -81,7 +83,14 @@ async function crawlAndWrite (configuration) {
 
     const filePath = path.join(tmpDir, route)
     mkdirp.sync(filePath)
-    fs.writeFileSync(path.join(filePath, 'index.html'), content)
+
+    if (configuration.minify) {
+      const minifyConfig = configuration.minify === true ? {} : configuration.minify
+      const minifiedContent = minify(content, minifyConfig)
+      fs.writeFileSync(path.join(filePath, 'index.html'), minifiedContent)
+    } else {
+      fs.writeFileSync(path.join(filePath, 'index.html'), content)
+    }
 
     const logFileName = `${route}/index.html`.replace(/^\//, '')
     console.log(`prep: Rendered ${logFileName}`)
