@@ -51,7 +51,7 @@
     "express-history-api-fallback": "^2.0.0",
     "html-minifier": "^3.2.3",
     "mkdirp": "^0.5.1",
-    "nightmare": "^2.9.1",
+    "nightmare": "2.8.1",
     "serve-static": "^1.10.2",
     "sitemap": "^1.8.1"
   }
