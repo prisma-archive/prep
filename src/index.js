@@ -14,6 +14,9 @@ import Bluebird from 'bluebird'
 import sitemap from 'sitemap'
 import Nightmare from 'nightmare'
 import { minify } from 'html-minifier'
+import debugFactory from 'debug'
+
+const debug = debugFactory('prep')
 
 const { version } = require('../package.json')
 
@@ -36,6 +39,8 @@ async function crawlAndWrite (configuration) {
     concurrency: 4,
   }, configuration)
 
+  debug('Config prepared')
+
   // render sitemap
   const sm = sitemap.createSitemap({
     hostname: configuration.hostname,
@@ -43,6 +48,8 @@ async function crawlAndWrite (configuration) {
   })
   mkdirp.sync(targetDir)
   fs.writeFileSync(`${targetDir}/sitemap.xml`, sm.toString());
+
+  debug('Sitemap created')
 
   // start temporary local webserver
   const app = express()
@@ -61,6 +68,8 @@ async function crawlAndWrite (configuration) {
 
   server.listen(program.port)
 
+  debug('Server started')
+
   // render routes
   const promises = configuration.routes.map((route) => async () => {
     // remove leading slash from route
@@ -73,16 +82,23 @@ async function crawlAndWrite (configuration) {
       },
     })
 
+    debug('Nightmare started')
+
+    const url = `http${configuration.https ? 's' : ''}://localhost:${program.port}/${route}`
     const content = await nightmare
       .useragent(configuration.useragent)
       .viewport(configuration.dimensions.width, configuration.dimensions.height)
-      .goto(`http${configuration.https ? 's' : ''}://localhost:${program.port}/${route}`)
+      .goto(url)
       .wait(configuration.timeout)
       .evaluate(() => document.documentElement.outerHTML)
       .end()
 
+    debug('Crawling completed: %s', url)
+
     const filePath = path.join(tmpDir, route)
     mkdirp.sync(filePath)
+
+    debug('Directory created: %s', filePath)
 
     if (configuration.minify) {
       const minifyConfig = configuration.minify === true ? {} : configuration.minify
