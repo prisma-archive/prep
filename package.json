@@ -1,6 +1,6 @@
 {
   "name": "prep",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "Server-side rendering tool for your web app. Prerenders your app into static HTML files and supports routing.",
   "bin": "lib/index.js",
   "files": [
