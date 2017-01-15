@@ -8,12 +8,11 @@ RUN apt-get update && \
 ENV SCREEN_X=1280
 ENV SCREEN_Y=900
 
-WORKDIR /app
-
 COPY entrypoint.sh /entrypoint.sh
-
 RUN chmod +x /entrypoint.sh
 
 RUN npm i -g prep
+
+WORKDIR /app
 
 ENTRYPOINT ["/entrypoint.sh"]
