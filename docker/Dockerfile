@@ -10,9 +10,9 @@ ENV SCREEN_Y=900
 
 WORKDIR /app
 
-COPY entrypoint.sh entrypoint.sh
+COPY entrypoint.sh /entrypoint.sh
 
-RUN chmod +x entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 RUN npm i -g prep
 
