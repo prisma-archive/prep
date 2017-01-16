@@ -72,44 +72,16 @@ async function crawlAndWrite (configuration) {
 
   // render routes
   const promises = configuration.routes.map((route) => async () => {
-    // remove leading slash from route
-    route = route.replace(/^\//, '')
-
-    const nightmare = Nightmare({
-      show: false,
-      switches: {
-        'ignore-certificate-errors': true,
-      },
-    })
-
-    debug('Nightmare started')
-
-    const url = `http${configuration.https ? 's' : ''}://localhost:${program.port}/${route}`
-    const content = await nightmare
-      .useragent(configuration.useragent)
-      .viewport(configuration.dimensions.width, configuration.dimensions.height)
-      .goto(url)
-      .wait(configuration.timeout)
-      .evaluate(() => document.documentElement.outerHTML)
-      .end()
-
-    debug('Crawling completed: %s', url)
-
-    const filePath = path.join(tmpDir, route)
-    mkdirp.sync(filePath)
-
-    debug('Directory created: %s', filePath)
-
-    if (configuration.minify) {
-      const minifyConfig = configuration.minify === true ? {} : configuration.minify
-      const minifiedContent = minify(content, minifyConfig)
-      fs.writeFileSync(path.join(filePath, 'index.html'), minifiedContent)
-    } else {
-      fs.writeFileSync(path.join(filePath, 'index.html'), content)
+    let retryCount = 0
+    while (retryCount < 10) {
+      try {
+        await prepRoute(route, configuration)
+        return
+      } catch (e) {
+        retryCount++
+        console.warn(`Retry ${retryCount} for route: ${route}`)
+      }
     }
-
-    const logFileName = `${route}/index.html`.replace(/^\//, '')
-    console.log(`prep: Rendered ${logFileName}`)
   })
 
   // clean up files
@@ -118,6 +90,48 @@ async function crawlAndWrite (configuration) {
   await exec(`cp -rf "${tmpDir}"/* "${targetDir}"/`)
   await exec(`rm -rf "${tmpDir}"`)
   process.exit(0)
+}
+
+async function prepRoute (route, configuration) {
+  // remove leading slash from route
+  route = route.replace(/^\//, '')
+
+  const nightmare = Nightmare({
+    show: false,
+    switches: {
+      'ignore-certificate-errors': true,
+    },
+  })
+
+  debug('Nightmare started')
+
+  const url = `http${configuration.https ? 's' : ''}://localhost:${program.port}/${route}`
+  const content = await nightmare
+    .useragent(configuration.useragent)
+    .viewport(configuration.dimensions.width, configuration.dimensions.height)
+    .goto(url)
+    .evaluate(() => false) // wait until page loaded
+    .wait(configuration.timeout)
+    .evaluate(() => document.documentElement.outerHTML)
+    .end()
+
+  debug('Crawling completed: %s', url)
+
+  const filePath = path.join(tmpDir, route)
+  mkdirp.sync(filePath)
+
+  debug('Directory created: %s', filePath)
+
+  if (configuration.minify) {
+    const minifyConfig = configuration.minify === true ? {} : configuration.minify
+    const minifiedContent = minify(content, minifyConfig)
+    fs.writeFileSync(path.join(filePath, 'index.html'), minifiedContent)
+  } else {
+    fs.writeFileSync(path.join(filePath, 'index.html'), content)
+  }
+
+  const logFileName = `${route}/index.html`.replace(/^\//, '')
+  console.log(`prep: Rendered ${logFileName}`)
 }
 
 async function run () {
