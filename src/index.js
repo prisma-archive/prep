@@ -37,14 +37,17 @@ async function crawlAndWrite (configuration) {
     useragent: 'Prep',
     minify: false,
     concurrency: 4,
+    additionalSitemapUrls: [],
   }, configuration)
 
-  debug('Config prepared')
+  debug('Config prepared', configuration)
 
   // render sitemap
+  const sitemapUrs = configuration.routes.map(route => ({url: route}))
+    .concat(configuration.additionalSitemapUrls.map(route => ({url: route})))
   const sm = sitemap.createSitemap({
     hostname: configuration.hostname,
-    urls: configuration.routes.map((route) => ({url: route}))
+    urls: sitemapUrs,
   })
   mkdirp.sync(targetDir)
   fs.writeFileSync(`${targetDir}/sitemap.xml`, sm.toString());

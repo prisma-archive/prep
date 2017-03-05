@@ -43,6 +43,8 @@ const defaultConfig = {
   hostname: 'http://localhost',
   useragent: 'Prep',
   minify: false,
+  concurrency: 4,
+  additionalSitemapUrls: [],
 }
 ```
 
@@ -53,6 +55,8 @@ const defaultConfig = {
 * `hostname` is used to show the correct urls in the generated sitemap that is stored in `[target-dir]/sitemap.xml`
 * `useragent` is set a `navigator.userAgent`
 * `minify` is a boolean or a [html-minifier](https://github.com/kangax/html-minifier) configuration object.
+* `concurrency` controls how many routes are pre-rendered in parallel. (Default: `4`)
+* `additionalSitemapUrls` is a list of URLs to include as well to the generated `sitemap.xml`. (Default: `[]`)
 
 ## Example `prep.js`
 

@@ -706,14 +706,7 @@ babel-register@^6.18.0:
     mkdirp "^0.5.1"
     source-map-support "^0.4.2"
 
-babel-runtime@^6.0.0, babel-runtime@^6.11.6, babel-runtime@^6.9.0, babel-runtime@^6.9.1:
-  version "6.18.0"
-  resolved "https://registry.yarnpkg.com/babel-runtime/-/babel-runtime-6.18.0.tgz#0f4177ffd98492ef13b9f823e9994a02584c9078"
-  dependencies:
-    core-js "^2.4.0"
-    regenerator-runtime "^0.9.5"
-
-babel-runtime@^6.20.0:
+babel-runtime@^6.0.0, babel-runtime@^6.11.6, babel-runtime@^6.20.0, babel-runtime@^6.9.0, babel-runtime@^6.9.1:
   version "6.20.0"
   resolved "https://registry.yarnpkg.com/babel-runtime/-/babel-runtime-6.20.0.tgz#87300bdcf4cd770f09bf0048c64204e17806d16f"
   dependencies:
@@ -1847,9 +1840,9 @@ negotiator@0.6.1:
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/negotiator/-/negotiator-0.6.1.tgz#2b327184e8992101177b28563fb5e7102acd0ca9"
 
-nightmare@^2.9.1:
-  version "2.9.1"
-  resolved "https://registry.yarnpkg.com/nightmare/-/nightmare-2.9.1.tgz#2242c62c0796bbecffd351a10ca7310d11ce96b5"
+nightmare@2.9.0:
+  version "2.9.0"
+  resolved "https://registry.yarnpkg.com/nightmare/-/nightmare-2.9.0.tgz#1aed57dba60412eb3d3eb83202522c3461993df9"
   dependencies:
     debug "^2.2.0"
     deep-defaults "^1.0.3"
