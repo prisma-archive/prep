@@ -38,6 +38,7 @@ async function crawlAndWrite (configuration) {
     minify: false,
     concurrency: 4,
     additionalSitemapUrls: [],
+    flatStructure: false,
   }, configuration)
 
   debug('Config prepared', configuration)
@@ -120,20 +121,43 @@ async function prepRoute (route, configuration) {
 
   debug('Crawling completed: %s', url)
 
-  const filePath = path.join(tmpDir, route)
-  mkdirp.sync(filePath)
+  const cleanRoute = route.replace('.html', '')
 
-  debug('Directory created: %s', filePath)
+  let filePath
+
+  if (configuration.flatStructure) {
+    filePath = tmpDir
+    mkdirp.sync(filePath)
+  } else {
+    filePath = path.join(tmpDir, cleanRoute)
+    mkdirp.sync(filePath)
+
+    debug('Directory created: %s', filePath)
+  }
 
   if (configuration.minify) {
     const minifyConfig = configuration.minify === true ? {} : configuration.minify
     const minifiedContent = minify(content, minifyConfig)
-    fs.writeFileSync(path.join(filePath, 'index.html'), minifiedContent)
+    if (configuration.flatStructure) {
+      fs.writeFileSync(path.join(filePath, `${cleanRoute}.html`), minifiedContent)
+    } else {
+      fs.writeFileSync(path.join(filePath, 'index.html'), minifiedContent)
+    }
   } else {
-    fs.writeFileSync(path.join(filePath, 'index.html'), content)
+    if (configuration.flatStructure) {
+      fs.writeFileSync(path.join(filePath, `${cleanRoute}.html`), content)
+    } else {
+      fs.writeFileSync(path.join(filePath, 'index.html'), content)
+    }
   }
 
-  const logFileName = `${route}/index.html`.replace(/^\//, '')
+  let logFileName
+
+  if (configuration.flatStructure) {
+    logFileName = `${cleanRoute}.html`.replace(/^\//, '')
+  } else {
+    logFileName = `${route}/index.html`.replace(/^\//, '')
+  }
   console.log(`prep: Rendered ${logFileName}`)
 }
 

@@ -47,6 +47,7 @@ const defaultConfig = {
   minify: false,
   concurrency: 4,
   additionalSitemapUrls: [],
+  flatStructure: false,
 }
 ```
 
@@ -59,6 +60,7 @@ const defaultConfig = {
 * `minify` is a boolean or a [html-minifier](https://github.com/kangax/html-minifier) configuration object.
 * `concurrency` controls how many routes are pre-rendered in parallel. (Default: `4`)
 * `additionalSitemapUrls` is a list of URLs to include as well to the generated `sitemap.xml`. (Default: `[]`)
+* `flatStructure` controls if prep should generate index.html files in route named subfolders or `{routeName}.html` files at top level. (Default: `false`)
 
 ## Example `prep.js`
 
