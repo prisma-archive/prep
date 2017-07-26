@@ -2,7 +2,7 @@
 
 Pre-renders your web app into static HTML based on your specified routes enabling SEO for single page applications.
 
-> NOTE: `prep` is now based on [Chromeless](https://github.com/mozilla/chromeless). We'll shortly release an updated version.
+> NOTE: `prep` is now based on [Chromeless](https://github.com/graphcool/chromeless). We'll shortly release an updated version.
 
 ## Features
 
