@@ -1,6 +1,8 @@
-# prep [![npm version](https://badge.fury.io/js/prep.svg)](https://badge.fury.io/js/prep)
+# prep [![npm version](https://badge.fury.io/js/prep.svg)](https://badge.fury.io/js/prep) [![CircleCI](https://circleci.com/gh/graphcool/prep.svg?style=svg)](https://circleci.com/gh/graphcool/prep)
 
 Pre-renders your web app into static HTML based on your specified routes enabling SEO for single page applications.
+
+> NOTE: `prep` is now based on [Chromeless](https://github.com/graphcool/chromeless). We'll shortly release an updated version.
 
 ## Features
 
@@ -40,7 +42,11 @@ const defaultConfig = {
     height: 900,
   },
   https: false,
-  hostname: 'http://localhost'
+  hostname: 'http://localhost',
+  useragent: 'Prep',
+  minify: false,
+  concurrency: 4,
+  additionalSitemapUrls: [],
 }
 ```
 
@@ -49,6 +55,10 @@ const defaultConfig = {
 * `dimensions` the page dimensions in pixels that the renderer should use to render the site. (Default: `1440` x `900`)
 * `https` prep uses https if true otherwise http
 * `hostname` is used to show the correct urls in the generated sitemap that is stored in `[target-dir]/sitemap.xml`
+* `useragent` is set a `navigator.userAgent`
+* `minify` is a boolean or a [html-minifier](https://github.com/kangax/html-minifier) configuration object.
+* `concurrency` controls how many routes are pre-rendered in parallel. (Default: `4`)
+* `additionalSitemapUrls` is a list of URLs to include as well to the generated `sitemap.xml`. (Default: `[]`)
 
 ## Example `prep.js`
 
@@ -59,7 +69,7 @@ There are three different ways to configure `prep`. Which one you pick depends o
 The probably easiest way is to export a simple Javascript object.
 
 ```js
-export default {
+exports.default = {
   routes: [
     '/',
     '/world'
@@ -72,7 +82,7 @@ export default {
 You can also return a function that returns the config for `prep`.
 
 ```js
-export default () => {
+exports.default = () => {
   return {
     routes: [
       '/',
@@ -84,7 +94,7 @@ export default () => {
 
 ### 3. Asynchronous Function (Promise)
 
-Furthermore you can also return a `Promise` or use ES7 features such as `async` & `await`.
+Furthermore you can also return a `Promise` or use ES7 features such as `async` & `await` (Babel pre-compile step needed).
 
 ```js
 export default async () => {
