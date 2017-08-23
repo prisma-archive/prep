@@ -71,7 +71,7 @@ async function crawlAndWrite(configuration) {
 
     server.listen(program.port)
 
-    debug('Server started')
+    debug('Server started: http://localhost:%i', program.port)
 
     // render routes
     const promises = configuration.routes.map((route) => async() => {
@@ -108,9 +108,9 @@ async function prepRoute(route, configuration) {
 
     debug('Nightmare started')
     
-    const host = configuration.hostname ? configuration.hostname : `http${configuration.https ? 's' : ''}://localhost:${program.port}`
+    const host = `http${configuration.https ? 's' : ''}://localhost:${program.port}`
     const url = `${host}/${route}`
-    
+
     const content = await nightmare
         .useragent(configuration.useragent)
         .viewport(configuration.dimensions.width, configuration.dimensions.height)
