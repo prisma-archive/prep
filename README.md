@@ -1,5 +1,7 @@
 # prep [![npm version](https://badge.fury.io/js/prep.svg)](https://badge.fury.io/js/prep) [![CircleCI](https://circleci.com/gh/graphcool/prep.svg?style=svg)](https://circleci.com/gh/graphcool/prep)
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/graphcool/prep.svg)](https://greenkeeper.io/)
+
 Pre-renders your web app into static HTML based on your specified routes enabling SEO for single page applications.
 
 > NOTE: `prep` is now based on [Chromeless](https://github.com/graphcool/chromeless). We'll shortly release an updated version.
