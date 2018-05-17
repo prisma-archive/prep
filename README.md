@@ -1,8 +1,8 @@
-# prep [![npm version](https://badge.fury.io/js/prep.svg)](https://badge.fury.io/js/prep) [![CircleCI](https://circleci.com/gh/graphcool/prep.svg?style=svg)](https://circleci.com/gh/graphcool/prep)
+# prep [![npm version](https://badge.fury.io/js/prep.svg)](https://badge.fury.io/js/prep) [![CircleCI](https://circleci.com/gh/prismagraphql/prep.svg?style=svg)](https://circleci.com/gh/prismagraphql/prep)
 
 Pre-renders your web app into static HTML based on your specified routes enabling SEO for single page applications.
 
-> NOTE: `prep` is now based on [Chromeless](https://github.com/graphcool/chromeless). We'll shortly release an updated version.
+> NOTE: `prep` is now based on [Chromeless](https://github.com/prismagraphql/chromeless). We'll shortly release an updated version.
 
 ## Features
 
@@ -116,4 +116,4 @@ The concept behind `prep` is very simple. `prep` starts a temporary local webser
 
 Join our [Slack community](http://slack.graph.cool/) if you run into issues or have questions. We love talking to you!
 
-![](http://i.imgur.com/5RHR6Ku.png)
+<p align="center"><a href="https://oss.prisma.io"><img src="https://imgur.com/IMU2ERq.png" alt="Prisma" height="170px"></a></p>
